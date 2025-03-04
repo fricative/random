@@ -214,7 +214,7 @@ private:
 
 class ConstraintNotEqual: public Constraint{
 public:
-    ConstraintNotEqual(struct coord p1, struct coord p2): p1{p1}, p2{p2}{};
+    ConstraintNotEqual(coord p1, coord p2): p1{p1}, p2{p2}{};
 
     bool infer(Game& game) override {
 
@@ -228,8 +228,49 @@ public:
             game.set(p1, negate_sign(game, p2));
             return true;
         }
+        
+        auto suns = 0, moons = 0;
+        if(is_vertical(p1, p2)){
+            for(int i=0; i<6; ++i)
+                switch(game.board[i][p1.col]){
+                    case 1:
+                        ++suns;
+                        break;
+                    case 2:
+                        ++moons;
+                        break;
+                }
+            if(suns == 2 || moons == 2){
+                auto opposite = moons == 2 ? 1 : 2;
+                for(int i=0; i<6; i++){
+                    auto c = coord(i, p1.col);
+                    if(game.at(c) == 0 && c != p1 && c != p2){
+                        game.set(c, opposite);                    
+                    }
+                }
+            }
+        } else {
+            for(int i=0; i<6; ++i)
+                switch(game.board[p1.row][i]){
+                    case 1:
+                        ++suns;
+                        break;
+                    case 2:
+                        ++moons;
+                        break;
+                }
+            if(suns == 2 || moons == 2){
+                auto opposite = moons == 2 ? 1 : 2;
+                for(int i=0; i<6; i++){
+                    auto c = coord(p1.row, i);
+                    if(game.at(c) == 0 && c != p1 && c != p2){
+                        game.set(c, opposite);
+                    }
+                }
+            }
+        }
         return false;
-    };
+    }
 private:
     coord p1;
     coord p2;
@@ -740,6 +781,80 @@ int main() {
                 new ConstraintNotEqual(coord(3,5), coord(4,5)),
                 new ConstraintNotEqual(coord(4,2), coord(4,3)),
                 new ConstraintNotEqual(coord(5,3), coord(5,4)),
+            }
+        ),
+        make_pair(
+            Game(
+                std::array{
+                    std::array{0,2,2,0,0,0},
+                    std::array{2,2,0,0,0,0},
+                    std::array{2,0,0,0,0,0},
+                    std::array{0,0,0,0,0,0},
+                    std::array{0,0,0,0,0,0},
+                    std::array{0,0,0,0,0,0},
+                }
+            ),    
+            vector<Constraint*>{        
+                new ConstraintEqual(coord(2,3), coord(2,4)),
+                new ConstraintEqual(coord(2,2), coord(3,2)),
+                new ConstraintEqual(coord(4,2), coord(5,2)),
+                new ConstraintEqual(coord(4,3), coord(4,4)),
+
+                new ConstraintNotEqual(coord(2,2), coord(2,3)),
+                new ConstraintNotEqual(coord(2,4), coord(2,5)),
+                new ConstraintNotEqual(coord(3,2), coord(4,2)),
+                new ConstraintNotEqual(coord(4,4), coord(4,5)),
+                new ConstraintNotEqual(coord(4,5), coord(5,5)),
+                new ConstraintNotEqual(coord(5,2), coord(5,3)),
+                new ConstraintNotEqual(coord(5,3), coord(5,4)),
+                new ConstraintNotEqual(coord(5,4), coord(5,5)),
+            }
+        ),
+        make_pair(
+            Game(
+                std::array{
+                    std::array{2,1,0,0,0,0},
+                    std::array{0,2,0,0,0,0},
+                    std::array{0,0,0,2,1,1},
+                    std::array{0,0,0,1,0,2},
+                    std::array{0,0,0,2,1,1},
+                    std::array{0,0,0,0,0,0},
+                }
+            ),    
+            vector<Constraint*>{        
+                new ConstraintEqual(coord(0,4), coord(1,4)),
+
+                new ConstraintNotEqual(coord(0,3), coord(0,4)),
+                new ConstraintNotEqual(coord(2,0), coord(2,1)),
+                new ConstraintNotEqual(coord(2,1), coord(2,2)),
+                new ConstraintNotEqual(coord(2,0), coord(3,0)),
+                new ConstraintNotEqual(coord(2,2), coord(3,2)),
+                new ConstraintNotEqual(coord(3,0), coord(4,0)),
+                new ConstraintNotEqual(coord(3,2), coord(4,2)),
+                new ConstraintNotEqual(coord(4,0), coord(4,1)),   
+                new ConstraintNotEqual(coord(4,1), coord(4,2)),   
+            }
+        ),
+        make_pair(
+            Game(
+                std::array{
+                    std::array{0,0,0,0,0,0},
+                    std::array{0,2,1,1,2,0},
+                    std::array{0,0,0,0,0,0},
+                    std::array{0,0,0,0,0,0},
+                    std::array{0,0,0,0,0,0},
+                    std::array{0,0,0,0,0,0},
+                }
+            ),    
+            vector<Constraint*>{        
+                new ConstraintEqual(coord(4,1), coord(4,2)),
+                new ConstraintEqual(coord(4,3), coord(4,4)),
+                new ConstraintEqual(coord(5,2), coord(5,3)),
+                new ConstraintEqual(coord(2,1), coord(3,1)),
+
+                new ConstraintNotEqual(coord(2,2), coord(3,2)),
+                new ConstraintNotEqual(coord(2,3), coord(3,3)),
+                new ConstraintNotEqual(coord(2,4), coord(3,4)),
             }
         ),
     };
