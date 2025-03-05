@@ -2,7 +2,8 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
-#include <locale>
+#include <map>
+#include <algorithm>
 
 using namespace std;
 
@@ -54,17 +55,6 @@ int negate_sign(Game& g, struct coord p){
     return g.at(p) == 1 ? 2 : 1;
 };
 
-void print_game(const Game& g){
-    std::locale::global(std::locale(""));
-    for(size_t i=0; i<6; i++){
-        for(size_t j=0; j<6; j++){
-            cout << g.board[i][j] << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;
-};
-
 bool is_vertical(const struct coord& p1, const struct coord& p2){
     return p1.col == p2.col;
 };
@@ -87,7 +77,7 @@ struct coord right(const struct coord& p, size_t offset=1){
 
 class ConstraintEqual: public Constraint{
 public:
-    ConstraintEqual(struct coord p1, struct coord p2): p1{p1}, p2{p2}{
+    ConstraintEqual(coord p1, coord p2): p1{p1}, p2{p2}{
         assert(p1.row == p2.row - 1 || p1.col == p2.col - 1);
     };
 
@@ -207,9 +197,19 @@ public:
         }
         return fulfilled;
     };
+
+    char get_symbol() const {
+        return '=';
+    }
+
+    std::pair<int, int> get_print_loc(){
+        unsigned int p1_row = p1.row << 1;
+        unsigned int p1_col = p1.col << 1;
+        return p1.row == p2.row ? std::make_pair(p1_row, p1_col + 1) : std::make_pair(p1_row + 1, p1_col);
+    };
 private:
-    struct coord p1;
-    struct coord p2;
+    coord p1;
+    coord p2;
 };
 
 class ConstraintNotEqual: public Constraint{
@@ -271,6 +271,16 @@ public:
         }
         return false;
     }
+
+    char get_symbol() const {
+        return '!';
+    }
+
+    std::pair<int, int> get_print_loc(){
+        unsigned int p1_row = p1.row << 1;
+        unsigned int p1_col = p1.col << 1;
+        return p1.row == p2.row ? std::make_pair(p1_row, p1_col + 1) : std::make_pair(p1_row + 1, p1_col);
+    };
 private:
     coord p1;
     coord p2;
@@ -491,11 +501,50 @@ private:
     size_t index;
 };
 
+void print_game(const Game& g, vector<Constraint*> constraints){
+    for(size_t i=0; i<11; i++){
+        for(size_t j=0; j<11; j++){
+            auto showed = false;
+            for(const auto& c: constraints){
+                if(auto ce = dynamic_cast<ConstraintEqual*>(c)){
+                    auto loc = ce->get_print_loc();
+                    if(loc.first == i && loc.second == j){
+                        cout << ce->get_symbol();
+                        showed = true;
+                        break;
+                    }
+                } 
+                if(auto ce = dynamic_cast<ConstraintNotEqual*>(c)){
+                    auto loc = ce->get_print_loc();
+                    if(loc.first == i && loc.second == j){
+                        cout << ce->get_symbol();
+                        showed = true;
+                        break;
+                    }
+                }
+            }
+            if (showed)
+                continue;
+            else{
+                if(i % 2 == 1 || j % 2 == 1){
+                    cout << " ";
+                } else {
+                    cout << g.board[i/2][j/2];
+                }
+            }
+        }
+        cout << endl;
+    }
+    cout << endl;
+};
+
 
 class Tango {
 public:
     Tango() {}
     void play(Game& game, vector<Constraint*>& constraints) {
+
+        vector<Constraint*> display_constraints = constraints;
 
         for(size_t i = 0; i < 6; ++i) {
             constraints.push_back(new ConstraintMax3('r', i));
@@ -540,7 +589,7 @@ public:
         }
             
         cout << "game: " << endl;
-        print_game(game);
+        print_game(game, display_constraints);
 
         vector<Constraint*> fulfilled_constraints;
         while(true) {
@@ -555,13 +604,13 @@ public:
             }
             if(new_constraints.empty()) {
                 cout << "solved:" << endl;
-                print_game(game);
+                print_game(game, display_constraints);
                 cout << "==================================" << endl;
                 break;
             }
             if(new_constraints.size() == constraints.size()) {
                 cout << "stuck at:\n" << endl;
-                print_game(game);
+                print_game(game, display_constraints);
                 break;
             } 
             constraints = new_constraints;
@@ -864,3 +913,5 @@ int main() {
     
     return 0;
 }
+
+ 
