@@ -114,7 +114,7 @@ bool ConstraintEqual::infer(Game& game) {
         }
     }
     return fulfilled;
-};
+}
 
 
 bool ConstraintNotEqual::infer(Game& game) {
@@ -170,7 +170,7 @@ bool ConstraintNotEqual::infer(Game& game) {
         }
     }
     return false;
-};
+}
 
 
 void Tango::play(Game& game, vector<Constraint*>& constraints) {

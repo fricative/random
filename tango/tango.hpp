@@ -24,7 +24,7 @@ struct Game{
     array<array<int, 6>, 6> board;
     Game(array<array<int, 6>, 6> b): board{b}{};
 
-    int at(struct coord c) noexcept {return board[c.row][c.col];};
+    int at(struct coord c) {return board[c.row][c.col];};
     
     void set(const coord& c, const int v){
         if(this->at(c) != 0 && this->at(c) != v) 
@@ -46,31 +46,31 @@ struct Game{
     };
 };
 
-inline int negate_sign(Game& game, coord pos) noexcept {
+inline int negate_sign(Game& game, coord pos) {
     if(game.at(pos)==0) 
         throw std::runtime_error("Cell is empty");
     return game.at(pos) == 1 ? 2 : 1;
-};
+}
 
 inline bool is_vertical(const coord& p1, const coord& p2) noexcept {
     return p1.col == p2.col;
-};
+}
 
 inline coord up(const coord& p, size_t offset=1) noexcept {
     return {p.row - offset, p.col};
-};
+}
 
 inline coord down(const coord& p, size_t offset=1) noexcept {
     return {p.row + offset, p.col};
-};
+}
 
 inline coord left(const coord& p, size_t offset=1) noexcept {
     return {p.row, p.col - offset};
-};
+}
 
 inline coord right(const coord& p, size_t offset=1) noexcept {
     return {p.row, p.col + offset};
-};
+}
 
 class Constraint{
     public:
@@ -336,8 +336,8 @@ private:
 };
 
 inline void print_game(const Game& g, vector<Constraint*> constraints){
-    for(size_t i=0; i<11; i++){
-        for(size_t j=0; j<11; j++){
+    for(int i=0; i<11; i++){
+        for(int j=0; j<11; j++){
             auto showed = false;
             for(const auto& c: constraints){
                 if(auto ce = dynamic_cast<ConstraintEqual*>(c)){
