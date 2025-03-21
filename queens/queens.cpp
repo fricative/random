@@ -1,22 +1,11 @@
-#include "queens.hpp"
 #include <cassert>
 #include <algorithm>
 #include <vector>
 #include <iostream>
 #include <ranges>
 
-std::array<std::array<Cell, 9>, 9> generate_blank_board()
-{
-    std::array<std::array<Cell, 9>, 9> board;
-    for (size_t row = 0; row < 9; ++row)
-    {
-        for (size_t col = 0; col < 9; ++col)
-        {
-            board[row][col] = Cell{row, col, 0};
-        }
-    }
-    return board;
-}
+#include "queens.hpp"
+
 
 size_t Game::find_color_with_fewest_empty_cells()
 {
@@ -35,9 +24,9 @@ size_t Game::find_color_with_fewest_empty_cells()
 
 void Game::print_board()
 {
-    for (size_t row = 0; row < 9; ++row)
+    for (size_t row = 0; row < board.size(); ++row)
     {
-        for (size_t col = 0; col < 9; ++col)
+        for (size_t col = 0; col < board.size(); ++col)
         {   
             auto cell = get_cell({row, col});
             if(!cell.is_set || !cell.has_queen)
@@ -129,14 +118,14 @@ void Game::rule_out_invalid_cells(const coord &loc)
         set_unavailable({recent_row + 1, recent_col + 1});
 
     // rule out cells in the same row
-    for (size_t col = 0; col < 9; ++col)
+    for (size_t col = 0; col < board.size(); ++col)
     {
         if (col != recent_col)
             set_unavailable({recent_row, col});
     }
 
     // rule out cells in the same column
-    for (size_t row = 0; row < 9; ++row)
+    for (size_t row = 0; row < board.size(); ++row)
     {
         if (row != recent_row)
             set_unavailable({row, recent_col});

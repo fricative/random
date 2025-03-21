@@ -2,6 +2,7 @@
 #include <array>
 #include <deque>
 #include <unordered_map>
+#include <vector>
 
 using coord = std::pair<size_t, size_t>;
 
@@ -55,28 +56,28 @@ struct Cell
     }
 };
 
-std::array<std::array<Cell, 9>, 9> generate_blank_board();
 
 class Game
 {
 public:
-    Game(std::array<std::array<Cell, 9>, 9> &b) : board{b}
+    Game(std::vector<std::vector<Cell>> &b) : board{b}
     {
-        for (size_t row = 0; row < 9; ++row)
+        for (size_t row = 0; row < b.size(); ++row)
         {
-            for (size_t col = 0; col < 9; ++col)
+            for (size_t col = 0; col < b.size(); ++col)
             {
                 lookup[board[row][col].color].emplace_back(row, col);
             }
         }
+        done = std::vector<int>(lookup.size(), 0);
     }
     bool solve();
     void print_board();
 
 private:
-    std::array<std::array<Cell, 9>, 9> &board;
+    std::vector<std::vector<Cell>> &board;
     std::deque<coord> steps;
-    std::array<int, 9> done = {0}; // denote whether a color is fulfilled
+    std::vector<int> done; // denote whether a color is fulfilled
 
     Cell& get_cell(const coord loc) noexcept;
     void rule_out_invalid_cells(const coord &recent_step);

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <array>
+#include <memory>
 #include "queens.hpp"
 
 
@@ -20,19 +21,23 @@ int main(int argc, char *argv[]) {
 
     std::string line;
     size_t line_no = 0;
-    auto board = generate_blank_board();
-    std::vector<std::array<std::array<Cell, 9>, 9>> games;
-
+    std::vector<std::vector<Cell>> board;
+    std::vector<std::vector<std::vector<Cell>>> games;
+    std::vector<Cell> row;
     while (std::getline(infile, line)) {
         if(line[0] == '='){
             games.push_back(board);
-            board = generate_blank_board();
+            board.clear();
             line_no = 0;
             continue;
         }
-        for(size_t col = 0; col < 9; ++col){
-            board[line_no][col].set_color(line[col] - '0');            
+        row.clear();
+        for(size_t col = 0; col < line.size(); ++col){
+            if(line[col] < '1' || line[col] > '9') 
+                break;
+            row.emplace_back(line_no, col, line[col] - '0');            
         }
+        board.push_back(row);
         line_no++;
     }
 
